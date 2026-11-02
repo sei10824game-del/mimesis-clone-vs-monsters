@@ -1,0 +1,11 @@
+<Project>
+  <!-- このファイルを Directory.Build.user.props にリネームして、GamePath を自分の環境に合わせる -->
+  <!-- このファイルは .gitignore で除外されているのでコミットされません -->
+  <PropertyGroup>
+    <GamePath>C:\Program Files (x86)\Steam\steamapps\common\MIMESIS</GamePath>
+    <!-- 必要に応じて個別に上書きも可能
+    <GameAssemblyPath>C:\...\MIMESIS\MIMESIS_Data\Managed</GameAssemblyPath>
+    <MelonLoaderPath>C:\...\MIMESIS\MelonLoader\net35</MelonLoaderPath>
+    -->
+  </PropertyGroup>
+</Project>

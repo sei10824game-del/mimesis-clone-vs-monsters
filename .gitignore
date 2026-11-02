@@ -1,0 +1,32 @@
+# Build outputs
+bin/
+obj/
+publish/
+_Test/
+out/
+
+# User local config
+Directory.Build.user.props
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+
+# Game private files (never commit)
+**/Assembly-CSharp.dll
+**/Assembly-CSharp.dll.bak
+**/Managed/
+**/MelonLoader/
+Libs/
+lib/game/
+lib/melonloader/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Thunderstore package
+*.zip
+import_cache/
