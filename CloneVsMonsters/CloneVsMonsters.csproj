@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CloneVsMonsters</RootNamespace>
+    <AssemblyName>CloneVsMonsters</AssemblyName>
+    <Version Condition="'$(Version)' == ''">1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Description>MIMESIS - 偽物がモンスターに敵対するMOD（Clone vs Monsters）</Description>
+    <Authors>sei10824game-del</Authors>
+    <Company>sei10824game-del</Company>
+    <Product>CloneVsMonsters</Product>
+    <Copyright>Copyright (c) 2026 sei10824game-del</Copyright>
+    <NeutralLanguage>ja-JP</NeutralLanguage>
+    <IsPackable>false</IsPackable>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- GamePath を渡さない場合はスタブ参照でビルド（CI用） -->
+    <SkipGameRefs Condition="'$(SkipGameRefs)' == ''">false</SkipGameRefs>
+  </PropertyGroup>
+
+  <!-- ローカル開発用のユーザー設定（gitignore済み） -->
+  <Import Project="Directory.Build.user.props" Condition="Exists('Directory.Build.user.props')" />
+
+  <!-- 環境変数 MIMESIS_PATH からの自動解決（Boilerplate/MimicAPIと同様） -->
+  <PropertyGroup>
+    <GamePath Condition="'$(GamePath)' == '' And '$(MIMESIS_PATH)' != ''">$(MIMESIS_PATH)</GamePath>
+    <!-- Steam デフォルトパスの自動検出 -->
+    <GamePath Condition="'$(GamePath)' == '' And Exists('$(registry:HKEY_CURRENT_USER\SOFTWARE\Valve\Steam@SteamPath)\steamapps\common\MIMESIS\MIMESIS_Data\Managed')">$(registry:HKEY_CURRENT_USER\SOFTWARE\Valve\Steam@SteamPath)\steamapps\common\MIMESIS</GamePath>
+    <GamePath Condition="'$(GamePath)' == '' And Exists('C:\Program Files (x86)\Steam\steamapps\common\MIMESIS\MIMESIS_Data\Managed')">C:\Program Files (x86)\Steam\steamapps\common\MIMESIS</GamePath>
+    <GamePath Condition="'$(GamePath)' == '' And Exists('C:\Program Files\Steam\steamapps\common\MIMESIS\MIMESIS_Data\Managed')">C:\Program Files\Steam\steamapps\common\MIMESIS</GamePath>
+    <GamePath Condition="'$(GamePath)' == '' And Exists('D:\SteamLibrary\steamapps\common\MIMESIS\MIMESIS_Data\Managed')">D:\SteamLibrary\steamapps\common\MIMESIS</GamePath>
+
+    <GameAssemblyPath Condition="'$(GameAssemblyPath)' == '' And '$(GamePath)' != ''">$(GamePath)\MIMESIS_Data\Managed</GameAssemblyPath>
+    <MelonLoaderPath Condition="'$(MelonLoaderPath)' == '' And '$(GamePath)' != ''">$(GamePath)\MelonLoader\net35</MelonLoaderPath>
+    <!-- 新しいMelonLoader 0.7.x は net6 フォルダを使う場合もあるのでフォールバック -->
+    <MelonLoaderPath Condition="'$(MelonLoaderPath)' == '' Or !Exists('$(MelonLoaderPath)')">$(GamePath)\MelonLoader\net6</MelonLoaderPath>
+    <OutputPath Condition="'$(OutputPath)' == ''">bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+
+  <!-- ゲームDLLが存在する場合のみ参照（CIではスキップ） -->
+  <ItemGroup Condition="'$(SkipGameRefs)' != 'true' And Exists('$(GameAssemblyPath)\Assembly-CSharp.dll')">
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(GameAssemblyPath)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(GameAssemblyPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(GameAssemblyPath)\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AIModule">
+      <HintPath>$(GameAssemblyPath)\UnityEngine.AIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MelonLoader">
+      <HintPath>$(MelonLoaderPath)\MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(MelonLoaderPath)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FishNet.Runtime" Condition="Exists('$(GameAssemblyPath)\FishNet.Runtime.dll')">
+      <HintPath>$(GameAssemblyPath)\FishNet.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- CI/スタブ環境用の最小参照（nugetのHarmonyは使わず、MelonLoader同梱のHarmonyを想定） -->
+  <!-- 実際のビルドは GamePath がある環境で行うこと。SkipGameRefs=true でも構文チェック用にダミー参照を生成 -->
+  <ItemGroup Condition="'$(SkipGameRefs)' == 'true' Or !Exists('$(GameAssemblyPath)\Assembly-CSharp.dll')">
+    <!-- スタブ参照はコンパイル時の型解決用ダミー。実動作には影響しない -->
+    <Compile Include="Utils\Stubs.cs" Condition="Exists('Utils\Stubs.cs')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.3.3" Condition="'$(SkipGameRefs)' == 'true'" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

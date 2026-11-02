@@ -1,0 +1,12 @@
+{
+    "name": "CloneVsMonsters",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/sei10824game-del/mimesis-clone-vs-monsters",
+    "description": "偽物（ミメシス）がプレイヤーと他の偽物に敵対せずモンスターに敵対するようにするMOD。偽物が味方としてモンスターと戦います。",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2100"
+    ],
+    "optional_dependencies": [
+        "DooDesch-MimicAPI-0.4.3"
+    ]
+}
